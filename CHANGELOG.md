@@ -7,6 +7,8 @@ All notable changes to Fox Trail. Versions follow [semantic versioning](https://
 - Real animated 3D animals instead of silhouettes: deer led by a stag and wolves on the hills, bats in the caves, fish, dolphins, a manta ray and whales under water, glowing spirits and a dragon in the fantasy lands. They walk at the pace of their own stride and sink into the same haze as the land.
 - Animals catch a little moonlight at night.
 - The foxes run into view once they have loaded, instead of a placeholder fox showing first.
+- Everything on the trail is in English: commit messages and subagent descriptions are no longer shown, only the trail's own words. Commit messages no longer leave git at all.
+- A showcase GIF and stills in `assets/showcase/`.
 
 ## 0.4.0
 

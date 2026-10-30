@@ -34,7 +34,16 @@ Patrick Kasl, [SynAI](https://www.synai.eu)
 /plugin install foxtrail --marketplace patrickkasl/foxtrail
 ```
 
+On an older Claude Code, add the marketplace first and install from it:
+
+```
+/plugin marketplace add patrickkasl/foxtrail
+/plugin install foxtrail@foxtrail
+```
+
 Then open the trail with `/foxtrail`. It opens in your browser; put it on a second screen, or let it sit behind your editor.
+
+**Don't see `/foxtrail`?** Run `claude update` and start a new session. An older Claude Code installs the plugin but quietly skips the part that runs the trail.
 
 ## Update
 
@@ -92,8 +101,9 @@ It writes no settings, start-up, build or instruction files.
 
 ## Requirements
 
-- Claude Code
-- macOS, Linux or Windows (Windows support is new; tell us how it goes)
+- A recent Claude Code (`claude update` brings it up to date)
+- macOS, Linux or Windows
+- Git
 - A modern browser with WebGL2 (Chrome, Edge, Firefox or Safari)
 
 ## Ideas and problems

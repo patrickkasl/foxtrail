@@ -1,5 +1,6 @@
 {
   "name": "foxtrail",
+  "displayName": "Fox Trail",
   "version": "0.4.0",
   "description": "A calm companion for coding with Claude: your sessions walk as a pack of foxes through ever-changing worlds, with ambient sound and a tinnitus comfort mode",
   "author": {
@@ -18,5 +19,9 @@
     "tinnitus",
     "companion",
     "fox"
-  ]
+  ],
+  "repository": "https://github.com/patrickkasl/foxtrail",
+  "documentationUrl": "https://github.com/patrickkasl/foxtrail#readme",
+  "supportUrl": "https://github.com/patrickkasl/foxtrail/issues",
+  "privacyPolicyUrl": "https://github.com/patrickkasl/foxtrail#privacy"
 }

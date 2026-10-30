@@ -2,7 +2,7 @@
 
 **A calm companion for coding with Claude Code.**
 
-![A pack of foxes walking through a meadow, a night, a cave, the sea, a fantasy land and space](assets/showcase/trail.gif)
+![A pack of foxes walking through a meadow, a night, a cave, the sea, a fantasy land and space](https://raw.githubusercontent.com/patrickkasl/foxtrail/showcase/trail.gif)
 
 While you build, your work goes for a quiet walk. Every Claude Code session becomes a fox in a small pack, wandering an endless trail through generated worlds: alpine meadows, mountain lakes, crystal caves, ringed planets, gardens beneath the waves. Subagents run along as cubs, every commit becomes a cairn by the path, and the pack sits down to enjoy the view when things go quiet.
 
@@ -68,10 +68,10 @@ Fox Trail has a small hooks module (`hooks/register.ts`). This is all it does.
 **Programs it runs**, each written out in full in the code:
 
 - `git rev-parse --show-toplevel`, to name the fox after your project folder.
-- `git config user.name` and `git log --all --since=<midnight> --format=%h --author=<you>`, to count today's commits. Only the count is used; commit messages are never read.
+- `git config user.name` and `git log --all --since=midnight --format=%an`, to count today's commits by you. Only author names are read, to count yours; commit messages are never read.
 - `git rev-parse --abbrev-ref HEAD`, to name the branch after you push.
 - `uname -s`, to tell macOS from Linux.
-- To open the page when you type `/foxtrail`: `open` on macOS; `xdg-open`, `gio open` or `wslview` on Linux and WSL; `rundll32 url.dll,FileProtocolHandler` or `cmd /c start` on Windows.
+- To open the page when you type `/foxtrail`: `open` on macOS; `xdg-open`, `gio open` or `wslview` on Linux and WSL; `rundll32 url.dll,FileProtocolHandler` on Windows.
 
 **What it reads:**
 

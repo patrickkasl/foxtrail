@@ -77,10 +77,8 @@ function push(type: Event['type'], now: number, text = ''): void {
 async function todaysCommits($: EngineInterface): Promise<number> {
   const name = await quietly($.process.run(['git', 'config', 'user.name'], { timeoutMs: GIT_TIMEOUT_MS }))
   if (!name) return 0
-  const midnight = new Date()
-  midnight.setHours(0, 0, 0, 0)
-  const log = await quietly($.process.run(['git', 'log', '--all', `--since=${midnight.toISOString()}`, '--format=%h', `--author=${name}`], { timeoutMs: GIT_TIMEOUT_MS }))
-  return log.split('\n').filter(Boolean).length
+  const authors = await quietly($.process.run(['git', 'log', '--all', '--since=midnight', '--format=%an'], { timeoutMs: GIT_TIMEOUT_MS }))
+  return authors.split('\n').filter(author => author === name).length
 }
 
 async function refreshCommits($: EngineInterface): Promise<void> {
@@ -144,7 +142,7 @@ async function status($: EngineInterface): Promise<void> {
 }
 
 /**
- * Opens the page in the default browser. Windows hands the file to its own file handler;
+ * Opens the page in the default browser. Windows hands the file to its own file handler (rundll32);
  * macOS has `open`; on Linux `open` is often openvt, so there it is `xdg-open`, then `gio open`,
  * and `wslview` under WSL.
  */
@@ -153,9 +151,7 @@ async function openPage($: EngineInterface): Promise<string> {
   const wait = { timeoutMs: 5000 }
   if (await isWindows($)) {
     const path = file.replace(/\//g, '\\')
-    if (await succeeded($.process.run(['rundll32', 'url.dll,FileProtocolHandler', path], wait))) return file
-    if (await succeeded($.process.run(['cmd', '/c', 'start', '', path], wait))) return file
-    return ''
+    return (await succeeded($.process.run(['rundll32', 'url.dll,FileProtocolHandler', path], wait))) ? file : ''
   }
   const system = await quietly($.process.run(['uname', '-s'], { timeoutMs: 2000 }))
   if (system === 'Darwin') return (await succeeded($.process.run(['open', file], wait))) ? file : ''

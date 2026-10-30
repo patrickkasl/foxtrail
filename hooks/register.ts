@@ -128,10 +128,16 @@ async function status($: EngineInterface): Promise<void> {
   $.ui.status(parts.join(' · '))
 }
 
+/**
+ * Opens the page in the default browser. macOS has `open`; on Linux `open` is often openvt,
+ * so there it is `xdg-open`, then `gio open`, and `wslview` under WSL.
+ */
 async function openPage($: EngineInterface): Promise<string> {
   const file = `${dir}/index.html`
-  for (const opener of ['open', 'xdg-open']) {
-    const ran = await $.process.run([opener, file], { timeoutMs: 5000 }).catch(() => null)
+  const system = await $.process.run(['uname', '-s'], { timeoutMs: 2000 }).then(r => r.stdout.trim()).catch(() => '')
+  const openers = system === 'Darwin' ? [['open', file]] : [['xdg-open', file], ['gio', 'open', file], ['wslview', file]]
+  for (const command of openers) {
+    const ran = await $.process.run(command, { timeoutMs: 5000 }).catch(() => null)
     if (ran && ran.exitCode === 0) return file
   }
   return ''

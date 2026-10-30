@@ -23,12 +23,12 @@
       <circle cx="560" cy="110" r="2.2" opacity="0.6"/><circle cx="880" cy="260" r="2.6" opacity="0.7"/><circle cx="120" cy="300" r="2.2" opacity="0.6"/>
       <circle cx="250" cy="230" r="1.8" opacity="0.6"/><circle cx="640" cy="230" r="2" opacity="0.5"/>
     </g>
-    <circle cx="742" cy="282" r="210" fill="url(#moonGlow)"/>
-    <circle cx="742" cy="282" r="92" fill="#fff4dc"/>
-    <path d="M0 640 L120 560 L210 600 L330 470 L450 590 L560 520 L690 610 L800 540 L920 600 L1024 560 L1024 1024 L0 1024 Z" fill="#a9789a" opacity="0.75"/>
-    <path d="M0 720 L150 640 L280 700 L410 620 L540 700 L700 650 L860 720 L1024 660 L1024 1024 L0 1024 Z" fill="#6c4f7c" opacity="0.9"/>
-    <path d="M0 860 C180 800 360 770 520 772 C680 774 840 800 1024 850 L1024 1024 L0 1024 Z" fill="#2b2246"/>
-    <g transform="translate(470 520) scale(1.35)">
+    <circle cx="640" cy="360" r="300" fill="url(#moonGlow)"/>
+    <circle cx="640" cy="360" r="168" fill="#fff4dc"/>
+    <path d="M0 700 L120 630 L210 665 L330 560 L450 660 L560 610 L690 680 L800 620 L920 670 L1024 630 L1024 1024 L0 1024 Z" fill="#a9789a" opacity="0.75"/>
+    <path d="M0 770 L150 710 L280 750 L410 690 L540 750 L700 715 L860 770 L1024 725 L1024 1024 L0 1024 Z" fill="#6c4f7c" opacity="0.9"/>
+    <path d="M0 900 C180 830 360 800 520 802 C680 804 840 830 1024 880 L1024 1024 L0 1024 Z" fill="#2b2246"/>
+    <g transform="translate(250 286) scale(2.75)">
       <path d="M72 190 C30 194 4 172 14 148 C24 130 50 130 74 148 C80 160 80 176 72 190 Z" fill="url(#fur)"/>
       <path d="M22 160 C14 150 18 138 30 136 C24 146 26 152 34 158 Z" fill="#fbf1e2"/>
       <path d="M64 190 C56 158 60 120 84 96 C92 86 96 74 94 62 C90 54 88 44 90 34 L86 4 L104 26 L118 8 L120 34 C132 40 146 46 158 50 C150 58 136 62 124 64 C120 78 122 92 126 104 C140 130 144 162 136 190 Z" fill="url(#fur)"/>

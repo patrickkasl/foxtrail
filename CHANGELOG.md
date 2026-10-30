@@ -9,6 +9,8 @@ All notable changes to Fox Trail. Versions follow [semantic versioning](https://
 - The foxes run into view once they have loaded, instead of a placeholder fox showing first.
 - Everything on the trail is in English: commit messages and subagent descriptions are no longer shown, only the trail's own words. Commit messages no longer leave git at all.
 - A showcase GIF and stills in `assets/showcase/`.
+- `/foxtrail` opens the page with `xdg-open`, `gio open` or `wslview` on Linux and WSL, never with Linux's unrelated `open` command.
+- A clearer icon: the fox is larger and sits against the moon, so it still reads at small sizes.
 
 ## 0.4.0
 

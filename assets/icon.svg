@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b1f4a"/>
+      <stop offset="0.45" stop-color="#5a4a86"/>
+      <stop offset="0.72" stop-color="#d98a7a"/>
+      <stop offset="1" stop-color="#f4c08e"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff6e0" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#fff6e0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f08a3e"/>
+      <stop offset="1" stop-color="#c8561f"/>
+    </linearGradient>
+    <clipPath id="tile"><rect width="1024" height="1024"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="1024" height="1024" fill="url(#sky)"/>
+    <g fill="#fff8ec">
+      <circle cx="170" cy="150" r="3.5" opacity="0.9"/><circle cx="300" cy="90" r="2.5" opacity="0.7"/><circle cx="420" cy="190" r="3" opacity="0.8"/>
+      <circle cx="560" cy="110" r="2.2" opacity="0.6"/><circle cx="880" cy="260" r="2.6" opacity="0.7"/><circle cx="120" cy="300" r="2.2" opacity="0.6"/>
+      <circle cx="250" cy="230" r="1.8" opacity="0.6"/><circle cx="640" cy="230" r="2" opacity="0.5"/>
+    </g>
+    <circle cx="742" cy="282" r="210" fill="url(#moonGlow)"/>
+    <circle cx="742" cy="282" r="92" fill="#fff4dc"/>
+    <path d="M0 640 L120 560 L210 600 L330 470 L450 590 L560 520 L690 610 L800 540 L920 600 L1024 560 L1024 1024 L0 1024 Z" fill="#a9789a" opacity="0.75"/>
+    <path d="M0 720 L150 640 L280 700 L410 620 L540 700 L700 650 L860 720 L1024 660 L1024 1024 L0 1024 Z" fill="#6c4f7c" opacity="0.9"/>
+    <path d="M0 860 C180 800 360 770 520 772 C680 774 840 800 1024 850 L1024 1024 L0 1024 Z" fill="#2b2246"/>
+    <g transform="translate(470 520) scale(1.35)">
+      <path d="M72 190 C30 194 4 172 14 148 C24 130 50 130 74 148 C80 160 80 176 72 190 Z" fill="url(#fur)"/>
+      <path d="M22 160 C14 150 18 138 30 136 C24 146 26 152 34 158 Z" fill="#fbf1e2"/>
+      <path d="M64 190 C56 158 60 120 84 96 C92 86 96 74 94 62 C90 54 88 44 90 34 L86 4 L104 26 L118 8 L120 34 C132 40 146 46 158 50 C150 58 136 62 124 64 C120 78 122 92 126 104 C140 130 144 162 136 190 Z" fill="url(#fur)"/>
+      <path d="M124 64 C130 74 132 86 128 98 C140 120 142 150 134 182 L112 182 C118 150 116 120 108 98 C112 86 114 74 112 64 Z" fill="#fbf1e2"/>
+      <circle cx="122" cy="44" r="3.2" fill="#2b1d16"/>
+      <path d="M156 50 L162 48" stroke="#2b1d16" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

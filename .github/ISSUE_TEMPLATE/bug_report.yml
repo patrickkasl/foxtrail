@@ -1,0 +1,30 @@
+name: Something is not right
+description: Tell us about a bug or something that looks or sounds off.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you see or hear, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we see it too?
+      description: The steps that lead to it, if you know them.
+  - type: input
+    id: version
+    attributes:
+      label: Fox Trail version
+      description: Shown by `claude plugin list`.
+  - type: input
+    id: system
+    attributes:
+      label: System and browser
+      placeholder: macOS 15, Chrome 141
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshot or anything else

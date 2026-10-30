@@ -1,0 +1,18 @@
+# Changelog
+
+All notable changes to Fox Trail. Versions follow [semantic versioning](https://semver.org).
+
+## Unreleased
+
+- Real animated 3D animals instead of silhouettes: deer led by a stag and wolves on the hills, bats in the caves, fish, dolphins, a manta ray and whales under water, glowing spirits and a dragon in the fantasy lands. They walk at the pace of their own stride and sink into the same haze as the land.
+- Animals catch a little moonlight at night.
+- The foxes run into view once they have loaded, instead of a placeholder fox showing first.
+
+## 0.4.0
+
+- First public release candidate.
+- A pack of foxes, one per Claude Code session, each with its own coat; subagents run along as cubs.
+- Generated worlds across earth, underground, space and fantasy, with changing weather, wildlife and a real day and night.
+- Commits become cairns, obstacles on the trail, sitting and jumping.
+- Generated ambient music, nature sounds and soft cues, with a tinnitus comfort mode.
+- Quiet signs, a journal, a welcome, and a still mode.

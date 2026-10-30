@@ -1,0 +1,22 @@
+{
+  "name": "foxtrail",
+  "version": "0.4.0",
+  "description": "A calm companion for coding with Claude: your sessions walk as a pack of foxes through ever-changing worlds, with ambient sound and a tinnitus comfort mode",
+  "author": {
+    "name": "Patrick Kasl",
+    "url": "https://www.synai.eu"
+  },
+  "homepage": "https://www.synai.eu",
+  "license": "MIT",
+  "keywords": [
+    "ambient",
+    "focus",
+    "calm",
+    "visualization",
+    "meditation",
+    "sound",
+    "tinnitus",
+    "companion",
+    "fox"
+  ]
+}

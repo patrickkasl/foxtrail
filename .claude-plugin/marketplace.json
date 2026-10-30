@@ -1,0 +1,12 @@
+{
+  "name": "foxtrail",
+  "description": "Fox Trail: a calm companion for coding with Claude Code, by SynAI B.V.",
+  "owner": { "name": "SynAI B.V.", "url": "https://www.synai.eu" },
+  "plugins": [
+    {
+      "name": "foxtrail",
+      "source": "./",
+      "description": "Your Claude Code sessions walk as a pack of foxes through ever-changing worlds, with ambient sound and a tinnitus comfort mode"
+    }
+  ]
+}

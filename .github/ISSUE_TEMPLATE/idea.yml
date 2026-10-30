@@ -1,0 +1,14 @@
+name: An idea for the trail
+description: Suggest a world, a sound, a feature, or anything that would make Fox Trail better.
+labels: [idea]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it help?

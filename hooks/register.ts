@@ -43,13 +43,19 @@ async function git($: EngineInterface, args: string[], cwd?: string): Promise<st
   }
 }
 
+/** Windows names the home folder USERPROFILE; Git Bash and every Unix name it HOME. */
 async function home($: EngineInterface): Promise<string> {
-  const out = await $.process.run(['printenv', 'HOME'], { timeoutMs: 2000 })
-  return out.stdout.trim()
+  return ((await $.env.get('HOME')) || (await $.env.get('USERPROFILE')) || '').replace(/[\\/]+$/, '')
+}
+
+async function isWindows($: EngineInterface): Promise<boolean> {
+  return (await $.env.get('OS')) === 'Windows_NT'
 }
 
 async function install($: EngineInterface): Promise<void> {
-  dir = `${await home($)}/.claude/foxtrail`
+  const base = await home($)
+  if (!base) throw new Error('Fox Trail could not find your home folder (HOME or USERPROFILE).')
+  dir = `${base}/.claude/foxtrail`
   await $.fs.write(`${dir}/index.html`, await $.fs.read(`${$.plugin.root}/web/index.html`))
 }
 
@@ -129,13 +135,20 @@ async function status($: EngineInterface): Promise<void> {
 }
 
 /**
- * Opens the page in the default browser. macOS has `open`; on Linux `open` is often openvt,
- * so there it is `xdg-open`, then `gio open`, and `wslview` under WSL.
+ * Opens the page in the default browser. Windows hands the file to its own file handler;
+ * macOS has `open`; on Linux `open` is often openvt, so there it is `xdg-open`, then `gio open`,
+ * and `wslview` under WSL.
  */
 async function openPage($: EngineInterface): Promise<string> {
   const file = `${dir}/index.html`
-  const system = await $.process.run(['uname', '-s'], { timeoutMs: 2000 }).then(r => r.stdout.trim()).catch(() => '')
-  const openers = system === 'Darwin' ? [['open', file]] : [['xdg-open', file], ['gio', 'open', file], ['wslview', file]]
+  let openers: string[][]
+  if (await isWindows($)) {
+    const path = file.replace(/\//g, '\\')
+    openers = [['rundll32', 'url.dll,FileProtocolHandler', path], ['cmd', '/c', 'start', '', path]]
+  } else {
+    const system = await $.process.run(['uname', '-s'], { timeoutMs: 2000 }).then(r => r.stdout.trim()).catch(() => '')
+    openers = system === 'Darwin' ? [['open', file]] : [['xdg-open', file], ['gio', 'open', file], ['wslview', file]]
+  }
   for (const command of openers) {
     const ran = await $.process.run(command, { timeoutMs: 5000 }).catch(() => null)
     if (ran && ran.exitCode === 0) return file
@@ -151,7 +164,7 @@ export const register: Register = on => {
     startedAt = await $.clock.now()
     sessionId = `${startedAt.toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`
     const root = (await git($, ['rev-parse', '--show-toplevel'], e.cwd)) || e.cwd
-    project = root.split('/').filter(Boolean).pop() || 'session'
+    project = root.split(/[\\/]/).filter(Boolean).pop() || 'session'
     await install($).catch(err => $.ui.log(`foxtrail: could not set up the page (${String(err)})`))
     await refreshCommits($).catch(() => undefined)
     await refreshAgents($)
@@ -174,7 +187,10 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'foxtrail' }, async $ => {
-    if (!dir) await install($)
+    if (!dir) {
+      const failed = await install($).then(() => '', err => String(err))
+      if (failed) return { text: `The trail could not be set up: ${failed}` }
+    }
     await writeState($).catch(() => undefined)
     const file = await openPage($)
     return { text: file ? 'The pack sets out. The fox trail is open in your browser.' : `Open this file in your browser: ${dir}/index.html` }

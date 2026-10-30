@@ -66,7 +66,7 @@ The trail does show your project folders' names, so keep still mode (H) in mind 
 ## Requirements
 
 - Claude Code
-- macOS or Linux
+- macOS, Linux or Windows (Windows support is new; tell us how it goes)
 - A modern browser with WebGL2 (Chrome, Edge, Firefox or Safari)
 
 ## Ideas and problems

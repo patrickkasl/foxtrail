@@ -59,9 +59,36 @@ Then run `/reload-plugins` in an open session, or start a new one.
 
 ## Privacy
 
-Everything stays on your computer. Fox Trail writes a small status file to `~/.claude/foxtrail/` with, per session, the project folder's name, what kind of tool is running, the kinds of subagents at work, and how many commits you made today. Commit messages and task descriptions are never written there. The page reads that file and nothing else. There is no account, no tracking and no analytics.
+Everything stays on your computer. Fox Trail sends nothing over the network, has no account, no tracking and no analytics, and the page in your browser makes no requests to anywhere. The trail does show your project folders' names, so keep still mode (H) in mind when you share your screen.
 
-The trail does show your project folders' names, so keep still mode (H) in mind when you share your screen.
+## What the plugin runs, reads and writes
+
+Fox Trail has a small hooks module (`hooks/register.ts`). This is all it does.
+
+**Programs it runs**, each written out in full in the code:
+
+- `git rev-parse --show-toplevel`, to name the fox after your project folder.
+- `git config user.name` and `git log --all --since=<midnight> --format=%h --author=<you>`, to count today's commits. Only the count is used; commit messages are never read.
+- `git rev-parse --abbrev-ref HEAD`, to name the branch after you push.
+- `uname -s`, to tell macOS from Linux.
+- To open the page when you type `/foxtrail`: `open` on macOS; `xdg-open`, `gio open` or `wslview` on Linux and WSL; `rundll32 url.dll,FileProtocolHandler` or `cmd /c start` on Windows.
+
+**What it reads:**
+
+- The environment variables `HOME`, `USERPROFILE` and `OS`, to find your home folder and your system.
+- From the session: the name of each tool Claude calls, to set the pace and the small sign above the fox. For Bash commands it only checks whether the command is a git commit, a git push or a test run, and for a test run it reads the number of passed and failed tests from the output.
+- The kinds of subagents that are running (such as Explore or Plan), for the cubs. Their task descriptions are not read.
+
+**What it writes**, in `~/.claude/foxtrail/` and nowhere else:
+
+- `index.html`, a copy of the page.
+- `state.js`, the pack's status: per session the project folder's name, the kind of tool that is running, how busy it is, the kinds of subagents, today's commit count, test counts and the branch of the last push. The page in your browser reads this file.
+
+It writes no settings, start-up, build or instruction files.
+
+**Its hooks** watch tool calls only to keep that status current. They never block or change a call, and if anything in them fails, the call goes on as if Fox Trail were not there. It also adds the command `/foxtrail` and a short status line.
+
+**Build files.** `package.json`, `package-lock.json`, `scripts/` and `src/` are only for building `web/index.html` from source (`npm run build`). Nothing is installed or built when you install the plugin: the page in `web/` is already built, with three.js, the fonts and the 3D models inside it.
 
 ## Requirements
 

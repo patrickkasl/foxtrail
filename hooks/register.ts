@@ -1,4 +1,4 @@
-import type { EngineInterface, Register } from 'claude-code'
+import type { EngineInterface, ProcessRunResult, Register } from 'claude-code'
 
 type Agent = { id: string; type: string; startedAt: number }
 type Event = { id: number; type: 'commit' | 'push' | 'tests-green' | 'tests-red'; at: number; text: string }
@@ -33,14 +33,23 @@ const seen = new Map<string, number>()
 
 const GIT_TIMEOUT_MS = 4000
 
-/** Runs git with a time limit; any failure, a missing git, or a folder that is no repository gives an empty answer. */
-async function git($: EngineInterface, args: string[], cwd?: string): Promise<string> {
+/**
+ * The output of a command that may fail quietly: a missing program, a non-zero exit
+ * or a folder that is no repository all give an empty answer. Every command is written
+ * out in full where it is run, so a reader (and the plugin directory) sees exactly what runs.
+ */
+async function quietly(run: Promise<ProcessRunResult>): Promise<string> {
   try {
-    const ran = await $.process.run(['git', ...args], { timeoutMs: GIT_TIMEOUT_MS, ...(cwd ? { cwd } : {}) })
+    const ran = await run
     return ran.exitCode === 0 ? ran.stdout.trim() : ''
   } catch {
     return ''
   }
+}
+
+/** Whether a command started and exited cleanly. */
+async function succeeded(run: Promise<ProcessRunResult>): Promise<boolean> {
+  return run.then(r => r.exitCode === 0, () => false)
 }
 
 /** Windows names the home folder USERPROFILE; Git Bash and every Unix name it HOME. */
@@ -66,11 +75,11 @@ function push(type: Event['type'], now: number, text = ''): void {
 
 /** How many commits the maker made today. Only the count leaves git: subjects stay private and may be in any language. */
 async function todaysCommits($: EngineInterface): Promise<number> {
-  const name = await git($, ['config', 'user.name'])
+  const name = await quietly($.process.run(['git', 'config', 'user.name'], { timeoutMs: GIT_TIMEOUT_MS }))
   if (!name) return 0
   const midnight = new Date()
   midnight.setHours(0, 0, 0, 0)
-  const log = await git($, ['log', '--all', `--since=${midnight.toISOString()}`, '--format=%h', `--author=${name}`])
+  const log = await quietly($.process.run(['git', 'log', '--all', `--since=${midnight.toISOString()}`, '--format=%h', `--author=${name}`], { timeoutMs: GIT_TIMEOUT_MS }))
   return log.split('\n').filter(Boolean).length
 }
 
@@ -141,18 +150,18 @@ async function status($: EngineInterface): Promise<void> {
  */
 async function openPage($: EngineInterface): Promise<string> {
   const file = `${dir}/index.html`
-  let openers: string[][]
+  const wait = { timeoutMs: 5000 }
   if (await isWindows($)) {
     const path = file.replace(/\//g, '\\')
-    openers = [['rundll32', 'url.dll,FileProtocolHandler', path], ['cmd', '/c', 'start', '', path]]
-  } else {
-    const system = await $.process.run(['uname', '-s'], { timeoutMs: 2000 }).then(r => r.stdout.trim()).catch(() => '')
-    openers = system === 'Darwin' ? [['open', file]] : [['xdg-open', file], ['gio', 'open', file], ['wslview', file]]
+    if (await succeeded($.process.run(['rundll32', 'url.dll,FileProtocolHandler', path], wait))) return file
+    if (await succeeded($.process.run(['cmd', '/c', 'start', '', path], wait))) return file
+    return ''
   }
-  for (const command of openers) {
-    const ran = await $.process.run(command, { timeoutMs: 5000 }).catch(() => null)
-    if (ran && ran.exitCode === 0) return file
-  }
+  const system = await quietly($.process.run(['uname', '-s'], { timeoutMs: 2000 }))
+  if (system === 'Darwin') return (await succeeded($.process.run(['open', file], wait))) ? file : ''
+  if (await succeeded($.process.run(['xdg-open', file], wait))) return file
+  if (await succeeded($.process.run(['gio', 'open', file], wait))) return file
+  if (await succeeded($.process.run(['wslview', file], wait))) return file
   return ''
 }
 
@@ -163,7 +172,7 @@ export const register: Register = on => {
     active = true
     startedAt = await $.clock.now()
     sessionId = `${startedAt.toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`
-    const root = (await git($, ['rev-parse', '--show-toplevel'], e.cwd)) || e.cwd
+    const root = (await quietly($.process.run(['git', 'rev-parse', '--show-toplevel'], { timeoutMs: GIT_TIMEOUT_MS, cwd: e.cwd }))) || e.cwd
     project = root.split(/[\\/]/).filter(Boolean).pop() || 'session'
     await install($).catch(err => $.ui.log(`foxtrail: could not set up the page (${String(err)})`))
     await refreshCommits($).catch(() => undefined)
@@ -213,7 +222,7 @@ export const register: Register = on => {
     if (/\bgit\b.*\bcommit\b/.test(e.command)) await refreshCommits($).catch(() => undefined)
     if (/\bgit\b.*\bpush\b/.test(e.command)) {
       const named = /\bpush\b(?:\s+-\S+)*\s+\S+\s+([\w./-]+)/.exec(e.command)?.[1]
-      const branch = named ?? await git($, ['rev-parse', '--abbrev-ref', 'HEAD'])
+      const branch = named ?? await quietly($.process.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], { timeoutMs: GIT_TIMEOUT_MS }))
       push('push', now, branch)
     }
     if (/artisan test|\bpest\b|phpunit|\bnpm (run )?test\b|\bpytest\b|\bgo test\b|\bcargo test\b/.test(e.command)) {

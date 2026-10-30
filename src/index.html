@@ -2347,6 +2347,7 @@ const ICONS = {
   mute: svg('<path d="M4 10v4h3l5 4V6L7 10z"/><path d="M17 10l4 4M21 10l-4 4"/>'),
   still: svg('<path d="M3 12c3-5 15-5 18 0-3 5-15 5-18 0z"/><path d="M4 20L20 4"/>'),
   ear: svg('<path d="M7 9a5 5 0 0 1 10 0c0 3-2.5 4-3.5 5.5S12.5 19 10.5 19 8 17.5 8 16"/><path d="M10 9.5a2 2 0 0 1 4 0c0 1.2-1.2 1.6-1.6 2.4"/>'),
+  picture: svg('<path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),
   help: svg('<circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.6"/><path d="M12 16.5h.01"/>'),
 }
 const ACT_OF = { Read: 'read', Grep: 'search', Glob: 'search', Edit: 'edit', Write: 'edit', NotebookEdit: 'edit', Bash: 'run', WebFetch: 'web', WebSearch: 'web', Agent: 'cub', Workflow: 'cub', Skill: 'read' }
@@ -2440,6 +2441,7 @@ controls.innerHTML = `
   <button type="button" data-act="journal" title="Journal">${ICONS.book}<span>journal</span></button>
   <button type="button" data-act="still" title="Still mode (H)">${ICONS.still}<span>still</span></button>
   <button type="button" data-act="comfort" title="Tinnitus comfort">${ICONS.ear}<span>tinnitus</span></button>
+  <button type="button" data-act="picture" title="Keep a picture of today's trail">${ICONS.picture}<span>picture</span></button>
   <button type="button" data-act="help" title="About">${ICONS.help}</button>`
 document.body.appendChild(controls)
 const journalEl = document.createElement('aside')
@@ -2479,8 +2481,10 @@ controls.addEventListener('click', ev => {
   if (act === 'still') setStill(!prefs.still)
   if (act === 'help') showWelcome()
   if (act === 'comfort') openComfort()
+  if (act === 'picture') pictureWanted = true
 })
 addEventListener('keydown', ev => { if (ev.key === 'h' || ev.key === 'H') setStill(!prefs.still) })
+addEventListener('keydown', ev => { if ((ev.key === 'p' || ev.key === 'P') && !ev.target.closest?.('input')) pictureWanted = true })
 setStill(!!prefs.still)
 
 // the welcome, once
@@ -2496,7 +2500,7 @@ welcomeEl.innerHTML = `<div class="card">
     <li><span class="ic">${ICONS.green}</span><span><b>The pace follows how busy things are.</b> When it goes quiet, the pack sits down.</span></li>
     <li><span class="ic">${ICONS.web}</span><span><b>The weather and the worlds are only there for the mood.</b> A new route every day.</span></li>
   </ul>
-  <p class="keys">Space jump · Z sit · M sound · H still · scroll to zoom</p>
+  <p class="keys">Space jump · Z sit · M sound · H still · P picture · scroll to zoom</p>
   <div class="choices"><button type="button" data-sound="on">Begin with sound</button><button type="button" class="quiet" data-sound="off">Walk in silence</button></div>
 </div>`
 document.body.appendChild(welcomeEl)
@@ -2542,6 +2546,43 @@ const LINES = [
   'What you are building matters.',
 ]
 /** A line in the middle of the screen that fades in and out on its own. */
+// ---------- a picture of today's trail, to keep or share: the world and the pack, never a project's name ----------
+let pictureWanted = false
+function keepPicture(biome) {
+  const src = renderer.domElement
+  const w = 1600, h = Math.round(w * src.height / src.width)
+  const out = Object.assign(document.createElement('canvas'), { width: w, height: h })
+  const g = out.getContext('2d')
+  g.drawImage(src, 0, 0, w, h)
+  const shade = g.createLinearGradient(0, h * 0.62, 0, h)
+  shade.addColorStop(0, 'rgba(0,0,0,0)')
+  shade.addColorStop(1, 'rgba(0,0,0,0.5)')
+  g.fillStyle = shade
+  g.fillRect(0, h * 0.62, w, h * 0.38)
+  g.fillStyle = '#fff'
+  g.shadowColor = 'rgba(0,0,0,0.45)'
+  g.shadowBlur = 12
+  g.font = 'italic 600 64px "Cormorant Garamond", Georgia, serif'
+  g.fillText(biome.name, 56, h - 92)
+  const pack = ordered().length
+  const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+  g.font = '400 22px Inter, sans-serif'
+  g.globalAlpha = 0.85
+  g.fillText(`${SUBS[biome.realm]} · ${date} · ${pack === 1 ? 'one fox' : `a pack of ${pack}`} · Fox Trail`, 58, h - 52)
+  out.toBlob(async blob => {
+    if (!blob) return
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      softly("A picture of today's trail.", 'Copied, ready to share.', 5000)
+    } catch {
+      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `fox-trail-${today}.png` })
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000)
+      softly("A picture of today's trail.", 'Saved with your downloads.', 5000)
+    }
+  }, 'image/png')
+}
+
 function softly(head, sub, ms = 7000) {
   if (prefs.still) return
   greetEl.innerHTML = `${head}<small>${sub}</small>`
@@ -3054,6 +3095,7 @@ function frame(now = performance.now()) {
   renderer.clearDepth()
   const t1 = debug.measure ? performance.now() : 0
   renderer.render(scene, camera)
+  if (pictureWanted) { pictureWanted = false; keepPicture(segmentAt(fox.position.x).biome) }
   if (debug.measure) {
     renderer.getContext().finish()
     const m = debug.measure

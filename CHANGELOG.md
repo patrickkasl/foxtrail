@@ -4,6 +4,7 @@ All notable changes to Fox Trail. Versions follow [semantic versioning](https://
 
 ## Unreleased
 
+- Keep a picture of today's trail with P or the new picture button: the world's name, the date and the size of the pack, copied and ready to share. It never shows a project's name.
 - Real animated 3D animals instead of silhouettes: deer led by a stag and wolves on the hills, bats in the caves, fish, dolphins, a manta ray and whales under water, glowing spirits and a dragon in the fantasy lands. They walk at the pace of their own stride and sink into the same haze as the land.
 - Animals catch a little moonlight at night.
 - The foxes run into view once they have loaded, instead of a placeholder fox showing first.

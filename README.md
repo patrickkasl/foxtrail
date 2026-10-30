@@ -26,6 +26,7 @@ Patrick Kasl, [SynAI](https://www.synai.eu)
 - **Worlds that never repeat**, with real day and night and changing weather. Deer and wolves on the hills, bats in the caves, fish, dolphins and whales under water, spirits and a dragon in the fantasy lands. New kinds of worlds arrive with updates.
 - **A generated soundtrack** of ambient music and nature sounds that follows the world, with soft cues for commits and tests.
 - **Tinnitus comfort**, a soft breathing sound bed without sharp high sounds, with an optional notch tuned to your own tone.
+- **A picture** of today's trail at the press of P: the world's name, the date and your pack, ready to share. It never shows a project's name.
 - **A journal** of the day, a **still mode** that hides every word, and a quiet welcome every time you arrive.
 
 ## Install
@@ -63,6 +64,7 @@ Then run `/reload-plugins` in an open session, or start a new one.
 | Z | sit down, or walk on |
 | M | sound on or off |
 | H | still mode |
+| P | keep a picture of today's trail, copied and ready to share |
 | Esc | close a panel |
 | Scroll | zoom in and out |
 

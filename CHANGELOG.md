@@ -2,14 +2,18 @@
 
 All notable changes to Fox Trail. Versions follow [semantic versioning](https://semver.org).
 
-## Unreleased
+## 0.5.0
 
+- The page is now made of plain, readable files instead of one packed file: three.js as unminified source in parts, the fox and the animals written out as text, and the fonts as font files. It looks and sounds the same.
+- Installing the plugin no longer downloads anything. The build tools and their `package.json` moved to the `workshop` branch; before, Claude Code installed them along with the plugin.
+- The page in `~/.claude/foxtrail/` is a small copy that reads everything else from the plugin's own folder.
+- `/foxtrail` opens the page with fixed commands, run inside `~/.claude/foxtrail/`.
 - Keep a picture of today's trail with P or the new picture button: the world's name, the date and the size of the pack, copied and ready to share. It never shows a project's name.
 - Real animated 3D animals instead of silhouettes: deer led by a stag and wolves on the hills, bats in the caves, fish, dolphins, a manta ray and whales under water, glowing spirits and a dragon in the fantasy lands. They walk at the pace of their own stride and sink into the same haze as the land.
 - Animals catch a little moonlight at night.
 - The foxes run into view once they have loaded, instead of a placeholder fox showing first.
 - Everything on the trail is in English: commit messages and subagent descriptions are no longer shown, only the trail's own words. Commit messages no longer leave git at all.
-- Showcase stills in `assets/showcase/`; the GIF lives on the `showcase` branch.
+- Showcase stills in the assets folder; the GIF lives on the `showcase` branch.
 - `/foxtrail` opens the page with `xdg-open`, `gio open` or `wslview` on Linux and WSL, never with Linux's unrelated `open` command.
 - Windows support: the home folder is read from `HOME` or `USERPROFILE`, and `/foxtrail` opens the page with Windows' own file handler (rundll32). If the page cannot be set up, `/foxtrail` says why.
 - A clearer icon: the fox is larger and sits against the moon, so it still reads at small sizes.

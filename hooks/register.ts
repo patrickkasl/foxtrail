@@ -61,11 +61,26 @@ async function isWindows($: EngineInterface): Promise<boolean> {
   return (await $.env.get('OS')) === 'Windows_NT'
 }
 
+/** A folder as a file: address ending in a slash, whatever the system writes its paths like. */
+function folderUrl(path: string): string {
+  const slashed = path.replace(/\\/g, '/').replace(/\/+$/, '')
+  const address = encodeURI(slashed).replace(/\?/g, '%3F').replace(/#/g, '%23').replace(/&/g, '&amp;')
+  if (address.startsWith('//')) return `file:${address}/`
+  return `file://${address.startsWith('/') ? '' : '/'}${address}/`
+}
+
+/**
+ * Puts the page in ~/.claude/foxtrail/, where it keeps one address across updates. The copy only adds
+ * a <base>, so three.js, the models and the fonts are read from the plugin's own web/ folder.
+ */
 async function install($: EngineInterface): Promise<void> {
   const base = await home($)
   if (!base) throw new Error('Fox Trail could not find your home folder (HOME or USERPROFILE).')
   dir = `${base}/.claude/foxtrail`
-  await $.fs.write(`${dir}/index.html`, await $.fs.read(`${$.plugin.root}/web/index.html`))
+  const page = await $.fs.read(`${$.plugin.root}/web/index.html`)
+  if (!page.includes('<head>')) throw new Error('the page in web/index.html has no <head>')
+  const based = `<head>\n<base href="${folderUrl(`${$.plugin.root}/web`)}">`
+  await $.fs.write(`${dir}/index.html`, page.replace('<head>', () => based))
 }
 
 function push(type: Event['type'], now: number, text = ''): void {
@@ -144,20 +159,18 @@ async function status($: EngineInterface): Promise<void> {
 /**
  * Opens the page in the default browser. Windows hands the file to its own file handler (rundll32);
  * macOS has `open`; on Linux `open` is often openvt, so there it is `xdg-open`, then `gio open`,
- * and `wslview` under WSL.
+ * and `wslview` under WSL. Each command runs inside ~/.claude/foxtrail/ and names only `index.html`,
+ * so every command is fixed text.
  */
 async function openPage($: EngineInterface): Promise<string> {
   const file = `${dir}/index.html`
-  const wait = { timeoutMs: 5000 }
-  if (await isWindows($)) {
-    const path = file.replace(/\//g, '\\')
-    return (await succeeded($.process.run(['rundll32', 'url.dll,FileProtocolHandler', path], wait))) ? file : ''
-  }
+  const here = { timeoutMs: 5000, cwd: dir }
+  if (await isWindows($)) return (await succeeded($.process.run(['rundll32', 'url.dll,FileProtocolHandler', 'index.html'], here))) ? file : ''
   const system = await quietly($.process.run(['uname', '-s'], { timeoutMs: 2000 }))
-  if (system === 'Darwin') return (await succeeded($.process.run(['open', file], wait))) ? file : ''
-  if (await succeeded($.process.run(['xdg-open', file], wait))) return file
-  if (await succeeded($.process.run(['gio', 'open', file], wait))) return file
-  if (await succeeded($.process.run(['wslview', file], wait))) return file
+  if (system === 'Darwin') return (await succeeded($.process.run(['open', 'index.html'], here))) ? file : ''
+  if (await succeeded($.process.run(['xdg-open', 'index.html'], here))) return file
+  if (await succeeded($.process.run(['gio', 'open', 'index.html'], here))) return file
+  if (await succeeded($.process.run(['wslview', 'index.html'], here))) return file
   return ''
 }
 

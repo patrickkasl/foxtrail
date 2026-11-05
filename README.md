@@ -82,24 +82,31 @@ Fox Trail has a small hooks module (`hooks/register.ts`). This is all it does.
 - `git config user.name` and `git log --all --since=midnight --format=%an`, to count today's commits by you. Only author names are read, to count yours; commit messages are never read.
 - `git rev-parse --abbrev-ref HEAD`, to name the branch after you push.
 - `uname -s`, to tell macOS from Linux.
-- To open the page when you type `/foxtrail`: `open` on macOS; `xdg-open`, `gio open` or `wslview` on Linux and WSL; `rundll32 url.dll,FileProtocolHandler` on Windows.
+- To open the page when you type `/foxtrail`, one of these, run inside `~/.claude/foxtrail/`: `open index.html` on macOS; `xdg-open index.html`, `gio open index.html` or `wslview index.html` on Linux and WSL; `rundll32 url.dll,FileProtocolHandler index.html` on Windows.
+
+**What it sends:** nothing. None of these programs reaches the network, and none is handed anything read from your files or your conversation. The module makes no network requests of its own.
 
 **What it reads:**
 
 - The environment variables `HOME`, `USERPROFILE` and `OS`, to find your home folder and your system.
+- Two files: the page itself (`web/index.html` in the plugin's folder) and its own status file (`~/.claude/foxtrail/state.js`).
 - From the session: the name of each tool Claude calls, to set the pace and the small sign above the fox. For Bash commands it only checks whether the command is a git commit, a git push or a test run, and for a test run it reads the number of passed and failed tests from the output.
 - The kinds of subagents that are running (such as Explore or Plan), for the cubs. Their task descriptions are not read.
 
 **What it writes**, in `~/.claude/foxtrail/` and nowhere else:
 
-- `index.html`, a copy of the page.
+- `index.html`, a copy of the page with one line added: a `<base>` that tells your browser to read three.js, the models and the fonts from the plugin's own folder.
 - `state.js`, the pack's status: per session the project folder's name, the kind of tool that is running, how busy it is, the kinds of subagents, today's commit count, test counts and the branch of the last push. The page in your browser reads this file.
 
 It writes no settings, start-up, build or instruction files.
 
-**Its hooks** watch tool calls only to keep that status current. They never block or change a call, and if anything in them fails, the call goes on as if Fox Trail were not there. It also adds the command `/foxtrail` and a short status line.
+**Its hooks:**
 
-**Build files.** `package.json`, `package-lock.json`, `scripts/` and `src/` are only for building `web/index.html` from source (`npm run build`). Nothing is installed or built when you install the plugin: the page in `web/` is already built, with three.js, the fonts and the 3D models inside it.
+- `session.start` sets the page up, adds the command `/foxtrail` and a short status line, and `session.end` takes the session out of the pack.
+- `tool.call` watches tool calls only to keep that status current. It never blocks or changes a call, and if anything in it fails, the call goes on as if Fox Trail were not there.
+- `command.run` answers `/foxtrail` and no other command: it opens the page.
+
+**No install step, and nothing packed.** There is no `package.json`, so nothing is downloaded or built when you install the plugin. Everything the page runs is text you can read: the page itself (`web/index.html`), three.js r160 as unminified source in parts (`web/three/`), and the fox and the animals written out as numbers (`web/models/`). The only files that are not text are the two fonts and the pictures. The tools that make the three.js parts and the model files from their originals live on the [workshop branch](../../tree/workshop).
 
 ## Requirements
 

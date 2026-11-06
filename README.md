@@ -45,7 +45,7 @@ Claude Code asks whether to add the marketplace (answer `y`) and for which scope
 claude plugin install foxtrail --marketplace patrickkasl/foxtrail
 ```
 
-Then start a new session and open the trail with `/foxtrail`. It opens in your browser; put it on a second screen, or let it sit behind your editor.
+Then open the trail with `/foxtrail` (after installing from your shell, in a session you start afterwards). It opens in your browser; put it on a second screen, or let it sit behind your editor.
 
 **Don't see `/foxtrail`?** Run `claude update` and start a new session. A Claude Code older than 2.1.287 installs the plugin but quietly skips the part that runs the trail.
 

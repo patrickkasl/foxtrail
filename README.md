@@ -31,20 +31,23 @@ Patrick Kasl, [SynAI](https://www.synai.eu)
 
 ## Install
 
+Fox Trail needs Claude Code 2.1.287 or newer. `claude --version` shows yours, and `claude update` brings it up to date.
+
+At the prompt of a Claude Code session:
+
 ```
 /plugin install foxtrail --marketplace patrickkasl/foxtrail
 ```
 
-On an older Claude Code, add the marketplace first and install from it:
+Claude Code asks whether to add the marketplace (answer `y`) and for which scope to install (Enter takes the first: you, in every project). Or install from your shell, without questions:
 
 ```
-/plugin marketplace add patrickkasl/foxtrail
-/plugin install foxtrail@foxtrail
+claude plugin install foxtrail --marketplace patrickkasl/foxtrail
 ```
 
-Then open the trail with `/foxtrail`. It opens in your browser; put it on a second screen, or let it sit behind your editor.
+Then start a new session and open the trail with `/foxtrail`. It opens in your browser; put it on a second screen, or let it sit behind your editor.
 
-**Don't see `/foxtrail`?** Run `claude update` and start a new session. An older Claude Code installs the plugin but quietly skips the part that runs the trail.
+**Don't see `/foxtrail`?** Run `claude update` and start a new session. A Claude Code older than 2.1.287 installs the plugin but quietly skips the part that runs the trail.
 
 Fox Trail is installed from GitHub, as above. It is not in Claude's plugin directory: for now the directory only lists plugins that run code of their own when they come from verified organizations.
 
@@ -112,7 +115,7 @@ It writes no settings, start-up, build or instruction files.
 
 ## Requirements
 
-- A recent Claude Code (`claude update` brings it up to date)
+- Claude Code 2.1.287 or newer (`claude update` brings it up to date)
 - macOS, Linux or Windows
 - Git
 - A modern browser with WebGL2 (Chrome, Edge, Firefox or Safari)

@@ -2,6 +2,17 @@
 
 All notable changes to Fox Trail. Versions follow [semantic versioning](https://semver.org).
 
+## 0.7.0
+
+- Fox Trail runs inside Claude Code again, as it did before 0.6: the short status line and `/foxtrail` are back, and Node.js is no longer needed. Version 0.6 moved to ordinary hooks to fit Claude's plugin directory. The directory takes neither form from a publisher that is not a verified organization, so the better of the two stays, and Fox Trail is installed from GitHub.
+- Everything 0.6 fixed on the page stays: the sound carries on while the tab is out of sight, the first commit or test result of a session is shown, and opening the page does not play back what happened before.
+- After `/clear` the same fox walks on.
+- A failing test run is noticed when the test command itself ends with an error, and counts are read the way Node's own test runner and TAP write them.
+- A command that only mentions a commit or a test run, in a message or a search, no longer sets a cairn or a test sign.
+- A cub's own tool calls set the pace of the pack, but no longer change the sign above its fox.
+- A session that ended without saying so, such as a closed terminal, no longer leaves a fox on the trail.
+- The pack's status file is `~/.claude/foxtrail/state.js` again. A `pack.js` beside it, left by 0.6, can be deleted.
+
 ## 0.6.0
 
 - Fox Trail no longer runs code inside Claude Code. The trail is now kept by ordinary hooks: one small, readable program (`hooks/trail.mjs`) that Claude Code starts with Node.js on a few session events. It reads and writes the same things as before, and runs the same git commands.

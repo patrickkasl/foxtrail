@@ -2688,36 +2688,19 @@ function updateZoo(t, dt) {
   }
 }
 
-/** The plugin's hooks (hooks/trail.mjs) keep the same numbers: how long a tool call counts, a silent session stays, a fox waits after /clear, a cub is out. */
-const BUSY_WINDOW_MS = 90000
-const STALE_MS = 12 * 60 * 60 * 1000
-const HANDOVER_MS = 15000
-const CUB_STALE_MS = 6 * 60 * 60 * 1000
+/** A session writes its status every second. One that has been silent this long ended without saying so: a closed terminal, a crash. */
+const SILENT_MS = 20000
 
-/**
- * The hooks report when something happens, not every second. So the page works out what is true right now:
- * which sessions are still there, how busy each one is, and whether its tool is still running.
- */
-function rightNow(sessions) {
+/** Leaves out the sessions that stopped reporting, so a fox never stays behind on the trail. */
+function stillThere(sessions) {
   const at = Date.now()
-  const live = {}
-  for (const [id, info] of Object.entries(sessions)) {
-    if (!Array.isArray(info.calls)) { live[id] = info; continue }
-    if (at - (info.updatedAt || 0) > STALE_MS || (info.handoverAt && at - info.handoverAt > HANDOVER_MS)) continue
-    live[id] = {
-      ...info,
-      busy: Math.min(1, info.calls.filter(called => at - called < BUSY_WINDOW_MS).length / 25),
-      tool: at < (info.toolUntil || 0) ? info.tool : '',
-      agents: (info.agents || []).filter(a => at - (a.startedAt || 0) < CUB_STALE_MS),
-    }
-  }
-  return live
+  return Object.fromEntries(Object.entries(sessions).filter(([, info]) => !info.updatedAt || at - info.updatedAt < SILENT_MS))
 }
 
 let link = { sessions: {}, at: 0 }
 let firstState = true
 window.__foxtrail = s => {
-  const sessions = rightNow(s.sessions || (s.events ? { solo: { ...s, id: 'solo', project: 'Claude', startedAt: 0 } } : {}))
+  const sessions = stillThere(s.sessions || (s.events ? { solo: { ...s, id: 'solo', project: 'Claude', startedAt: 0 } } : {}))
   link = { sessions, at: Date.now() }
   for (const [id, info] of Object.entries(sessions)) {
     let m = members.get(id)
@@ -2749,7 +2732,7 @@ window.__foxtrail = s => {
   firstState = false
 }
 /** The pack's status is written beside this page, in ~/.claude/foxtrail/; every other file comes from the plugin's own folder. */
-const STATE_URL = new URL('pack.js', location.href).href
+const STATE_URL = new URL('state.js', location.href).href
 function poll() {
   const s = document.createElement('script')
   s.src = STATE_URL + '?' + Date.now()

@@ -2688,10 +2688,36 @@ function updateZoo(t, dt) {
   }
 }
 
+/** The plugin's hooks (hooks/trail.mjs) keep the same numbers: how long a tool call counts, a silent session stays, a fox waits after /clear, a cub is out. */
+const BUSY_WINDOW_MS = 90000
+const STALE_MS = 12 * 60 * 60 * 1000
+const HANDOVER_MS = 15000
+const CUB_STALE_MS = 6 * 60 * 60 * 1000
+
+/**
+ * The hooks report when something happens, not every second. So the page works out what is true right now:
+ * which sessions are still there, how busy each one is, and whether its tool is still running.
+ */
+function rightNow(sessions) {
+  const at = Date.now()
+  const live = {}
+  for (const [id, info] of Object.entries(sessions)) {
+    if (!Array.isArray(info.calls)) { live[id] = info; continue }
+    if (at - (info.updatedAt || 0) > STALE_MS || (info.handoverAt && at - info.handoverAt > HANDOVER_MS)) continue
+    live[id] = {
+      ...info,
+      busy: Math.min(1, info.calls.filter(called => at - called < BUSY_WINDOW_MS).length / 25),
+      tool: at < (info.toolUntil || 0) ? info.tool : '',
+      agents: (info.agents || []).filter(a => at - (a.startedAt || 0) < CUB_STALE_MS),
+    }
+  }
+  return live
+}
+
 let link = { sessions: {}, at: 0 }
 let firstState = true
 window.__foxtrail = s => {
-  const sessions = s.sessions || (s.events ? { solo: { ...s, id: 'solo', project: 'Claude', startedAt: 0 } } : {})
+  const sessions = rightNow(s.sessions || (s.events ? { solo: { ...s, id: 'solo', project: 'Claude', startedAt: 0 } } : {}))
   link = { sessions, at: Date.now() }
   for (const [id, info] of Object.entries(sessions)) {
     let m = members.get(id)
@@ -2703,16 +2729,18 @@ window.__foxtrail = s => {
     m.info = info
     m.leftAt = 0
     watchCubs(m)
+    // What had already happened when this page first saw the fox is its history, and is not played back. Whatever follows is news.
+    const known = m.lastEvent >= 0
     for (const e of info.events || []) {
       if (e.id <= m.lastEvent) continue
-      const fresh = m.lastEvent >= 0
       m.lastEvent = e.id
-      if (!fresh) continue
+      if (!known) continue
       if (e.type === 'commit') { m.queue.push('jump', 'cairn'); cue.commit(); say(m, 'cairn', 'A new commit. A cairn goes up.'); acknowledge(m, 'cairn') }
       if (e.type === 'tests-green') { m.queue.push('jump'); cue.green(); say(m, 'green', /^\d+ tests? passed$|^Tests passed$/.test(e.text) ? e.text : 'Tests passed'); acknowledge(m, 'green') }
       if (e.type === 'tests-red') { cue.red(); say(m, 'red', /^\d+ tests? failed$/.test(e.text) ? e.text : 'Tests failed'); acknowledge(m, 'red') }
       if (e.type === 'push') say(m, 'push', e.text ? `Pushed to ${e.text}` : 'Pushed')
     }
+    if (m.lastEvent < 0) m.lastEvent = 0
     sessionStorage.setItem('foxtrail-event-' + id, String(m.lastEvent))
   }
   for (const m of members.values()) if (!sessions[m.id] && m.id !== 'solo' && !m.leftAt) m.leftAt = clock.elapsedTime
@@ -2721,7 +2749,7 @@ window.__foxtrail = s => {
   firstState = false
 }
 /** The pack's status is written beside this page, in ~/.claude/foxtrail/; every other file comes from the plugin's own folder. */
-const STATE_URL = new URL('state.js', location.href).href
+const STATE_URL = new URL('pack.js', location.href).href
 function poll() {
   const s = document.createElement('script')
   s.src = STATE_URL + '?' + Date.now()
@@ -3061,6 +3089,19 @@ function adaptResolution(interval) {
   if (perf.shown) perfEl.textContent = `${(1000 / perf.ms).toFixed(0)} beelden/s · landschap ${Math.round(LAND_SCALE * 100)}% · ${landTarget.width}×${landTarget.height}`
 }
 
+/**
+ * The browser stops drawing a tab that is out of sight, and with it the picture stands still. The sound must
+ * not: a maker often listens from another tab. So while the page is hidden a slow clock keeps the music and the
+ * nature sounds going, in the place and the weather the pack was last seen in. Lightning nobody sees makes no thunder.
+ */
+let heard = null
+setInterval(() => {
+  if (!document.hidden || !heard) return
+  const [biome, night, weather, amp] = heard
+  const busy = Date.now() - link.at < 5000 ? Math.max(0, ...Object.values(link.sessions).map(i => clamp(i.busy || 0))) : 0.35
+  updateAudio(biome, night, weather, busy, amp, 0)
+}, 1000)
+
 function frame(now = performance.now()) {
   requestAnimationFrame(frame)
   if (now - lastFrameAt < FRAME_MS - 2) return
@@ -3096,6 +3137,7 @@ function frame(now = performance.now()) {
   const weatherNow = updateWeather(t, dt, here, night)
   if (zoo) updateZoo(t, dt)
   else updateFauna(t, dt, here, night, weatherNow)
+  heard = [here, night, weatherNow, here.amp || 0.6]
   updateAudio(here, night, weatherNow, busy, here.amp || 0.6, uniforms.uFlash.value)
   animatePack(t, dt)
   updateCompanions(t, dt)

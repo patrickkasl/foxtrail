@@ -42,9 +42,9 @@ On an older Claude Code, add the marketplace first and install from it:
 /plugin install foxtrail@foxtrail
 ```
 
-Then open the trail with `/foxtrail`. It opens in your browser; put it on a second screen, or let it sit behind your editor.
+Then open the trail with `/foxtrail:open` (typing `/fox` finds it). It opens in your browser; put it on a second screen, or let it sit behind your editor.
 
-**Don't see `/foxtrail`?** Run `claude update` and start a new session. An older Claude Code installs the plugin but quietly skips the part that runs the trail.
+**No foxes, or the trail does not open?** Fox Trail's hooks run on Node.js. Check that `node --version` answers in your terminal (18 or newer), run `claude update`, and start a new session.
 
 ## Update
 
@@ -74,43 +74,47 @@ Everything stays on your computer. Fox Trail sends nothing over the network, has
 
 ## What the plugin runs, reads and writes
 
-Fox Trail has a small hooks module (`hooks/register.ts`). This is all it does.
+Fox Trail has no code that runs inside Claude Code. It has one small program, `hooks/trail.mjs`, that Claude Code starts with Node.js on a few session events and that ends again right away, and one skill, `/foxtrail:open`. This is all they do.
+
+**When it runs** (`hooks/hooks.json`):
+
+- When a session starts and ends: the fox joins the pack and leaves it. After `/clear` or `/resume` the same fox walks on.
+- Before and after each tool call: to set the pace and the small sign above the fox. These run in the background, so they never slow a call down, and they never block or change one.
+- When a subagent starts and stops: a cub sets out and comes home.
+- When you type `/foxtrail:open`: it opens the page.
+
+A session nobody is watching (`claude -p`, scripts) stays off the trail.
 
 **Programs it runs**, each written out in full in the code:
 
 - `git rev-parse --show-toplevel`, to name the fox after your project folder.
 - `git config user.name` and `git log --all --since=midnight --format=%an`, to count today's commits by you. Only author names are read, to count yours; commit messages are never read.
 - `git rev-parse --abbrev-ref HEAD`, to name the branch after you push.
-- `uname -s`, to tell macOS from Linux.
-- To open the page when you type `/foxtrail`, one of these, run inside `~/.claude/foxtrail/`: `open index.html` on macOS; `xdg-open index.html`, `gio open index.html` or `wslview index.html` on Linux and WSL; `rundll32 url.dll,FileProtocolHandler index.html` on Windows.
+- To open the page when you type `/foxtrail:open`, one of these, run inside `~/.claude/foxtrail/`: `open index.html` on macOS; `xdg-open index.html`, `gio open index.html` or `wslview index.html` on Linux and WSL; `rundll32 url.dll,FileProtocolHandler index.html` on Windows.
 
-**What it sends:** nothing. None of these programs reaches the network, and none is handed anything read from your files or your conversation. The module makes no network requests of its own.
+**What it sends:** nothing. None of these programs reaches the network, and none is handed anything read from your files or your conversation. The program makes no network requests of its own.
 
 **What it reads:**
 
-- The environment variables `HOME`, `USERPROFILE` and `OS`, to find your home folder and your system.
-- Two files: the page itself (`web/index.html` in the plugin's folder) and its own status file (`~/.claude/foxtrail/state.js`).
-- From the session: the name of each tool Claude calls, to set the pace and the small sign above the fox. For Bash commands it only checks whether the command is a git commit, a git push or a test run, and for a test run it reads the number of passed and failed tests from the output.
-- The kinds of subagents that are running (such as Explore or Plan), for the cubs. Their task descriptions are not read.
+- The event Claude Code hands it. Of that it uses the session's id and folder, the name of each tool Claude calls, and the kind of each subagent (such as Explore or Plan). For Bash commands it only checks whether the command is a git commit, a git push or a test run, and for a test run it reads the number of passed and failed tests from the output. It keeps nothing else: no prompts, no file contents, no command text, no task descriptions.
+- One environment variable, `CLAUDE_CODE_SESSION_ATTENDED`, to leave unattended sessions alone, and your home folder's location.
+- Two files: the page itself (`web/index.html` in the plugin's folder) and its own status file (`~/.claude/foxtrail/pack.js`).
 
 **What it writes**, in `~/.claude/foxtrail/` and nowhere else:
 
 - `index.html`, a copy of the page with one line added: a `<base>` that tells your browser to read three.js, the models and the fonts from the plugin's own folder.
-- `state.js`, the pack's status: per session the project folder's name, the kind of tool that is running, how busy it is, the kinds of subagents, today's commit count, test counts and the branch of the last push. The page in your browser reads this file.
+- `pack.js`, the pack's status: per session the project folder's name, the kind of tool that is running and when recent tool calls happened, the kinds of subagents, today's commit count, test counts and the branch of the last push. The page in your browser reads this file. While it is being written a `pack.lock` folder and a `.tmp` draft exist for a moment.
 
 It writes no settings, start-up, build or instruction files.
 
-**Its hooks:**
+**The skill** `/foxtrail:open` holds no commands. It only asks Claude to pass on, in one line, whether the page opened.
 
-- `session.start` sets the page up, adds the command `/foxtrail` and a short status line, and `session.end` takes the session out of the pack.
-- `tool.call` watches tool calls only to keep that status current. It never blocks or changes a call, and if anything in it fails, the call goes on as if Fox Trail were not there.
-- `command.run` answers `/foxtrail` and no other command: it opens the page.
-
-**No install step, and nothing packed.** There is no `package.json`, so nothing is downloaded or built when you install the plugin. Everything the page runs is text you can read: the page itself (`web/index.html`), three.js r160 as unminified source in parts (`web/three/`), and the fox and the animals written out as numbers (`web/models/`). The only files that are not text are the two fonts and the pictures. The tools that make the three.js parts and the model files from their originals live on the [workshop branch](../../tree/workshop).
+**No install step, and nothing packed.** There is no `package.json`, so nothing is downloaded or built when you install the plugin. Everything is text you can read: the hooks program (`hooks/trail.mjs`, with its tests in `tests/`), the page itself (`web/index.html`), three.js r160 as unminified source in parts (`web/three/`), and the fox and the animals written out as numbers (`web/models/`). The only files that are not text are the two fonts and the pictures. The tools that make the three.js parts and the model files from their originals live on the [workshop branch](../../tree/workshop).
 
 ## Requirements
 
 - A recent Claude Code (`claude update` brings it up to date)
+- Node.js 18 or newer
 - macOS, Linux or Windows
 - Git
 - A modern browser with WebGL2 (Chrome, Edge, Firefox or Safari)
